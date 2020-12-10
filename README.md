@@ -16,7 +16,7 @@ image needs to be cropped, and the other will be how to image is to be cropped r
 
 
 
-## Installation
+## Installation (for Linux)
 
 ```bash
 git clone https://github.com/roshansourav/impproject.git
