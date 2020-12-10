@@ -1,0 +1,11 @@
+body {
+    background-color: #f1f1f1;
+    font-family: arial;
+  }
+
+  .image {
+    border: 1px solid #ccc;
+    display: inline-block;
+    padding: 6px 12px;
+    cursor: pointer; 
+  }

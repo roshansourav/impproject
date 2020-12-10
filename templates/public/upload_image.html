@@ -1,0 +1,115 @@
+{% extends "public/templates/public_template.html" %}
+
+{% block title %}Smart Image Cropping{% endblock %}
+
+{% block main %}
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+
+            <h1>Smart Image Cropping</h1>
+            <hr>
+
+            <form action="/upload_image" method="POST" enctype="multipart/form-data">
+
+                <div class="form-group">
+                    <label>Select image (only JPG supported and upto 2 MB)</label>
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" name="image" id="image" oninput="filesize(this);">
+                        <label class="custom-file-label" for="image" id="Image_Text"></label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="uk-form-label">Scale</div>
+                    <select class="uk-select" id="scale" name="scale">
+                        <option value="0.90">90% (takes around 5 minutes to process)</option>
+                        <option value="0.80">80% (takes around 7 minutes to process)</option>
+                        <option value="0.75%">75% (takes around 10 minutes to process)</option>
+                        <option value="0.50">50% (takes around 14 minutes to process)</option>
+                        <option value="0.25">25% (takes around 18 minutes to process)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <div class="uk-form-label">orientation</div>
+                    <select class="uk-select" id="orientation" name="orientation">
+                        <option value="c">col-wise</option>
+                        <option value="r">row-wise</option>
+                    </select>
+                </div>
+
+                <center><button id="button_id" type="submit" class="btn btn-primary">Upload</button></center>
+
+            </form>
+            <hr>
+            <br>
+            <center>
+                <h5 id="Loading_ID">
+                    </h3>
+            </center>
+
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.1.0/uuidv4.min.js"></script>
+<script type="text/javascript" charset="utf-8">
+
+
+    //STORING FILESIZE IN COOKIES
+    function filesize(elem) {
+        document.cookie = `filesize=${elem.files[0].size}`
+    }
+
+    //Generate Unique ID
+    let CLIENT_SIDE_UNIQUE_ID = uuidv4().toString();
+    console.log(CLIENT_SIDE_UNIQUE_ID);
+    
+    fetch('/set_unique_id?id='+CLIENT_SIDE_UNIQUE_ID).then(function (response) {
+        return response.json();
+    }).then((x) => {
+        console.log("set to cookies successfully");
+    })
+
+
+    //FILENAME IN IMAGE BAR
+    document.querySelector("#image").onchange = function () {
+        document.querySelector("#Image_Text").innerHTML = this.files[0].name;
+    }
+
+    //Loading Screen Initiate
+    document.getElementById("button_id").addEventListener("click", (e) => {
+        console.log("click me");
+        document.querySelector("#Loading_ID").innerHTML = "Initialising... (wait for few seconds)";
+
+        let y;
+        function fname() {
+            fetch('/loading?ID='+CLIENT_SIDE_UNIQUE_ID).then(function (response) {
+                return response.json();
+            }).then((x) => {
+                document.querySelector("#Loading_ID").innerHTML = x.map;
+                y = x.map;
+                if (y[0] == 'p' || y[0] == 'c')
+                    STOP_FETCHING_LOADING_SCREEN();
+                console.log(x.map);
+            })
+        }
+        let refreshIntervalId = setInterval(fname, 2000);
+        function STOP_FETCHING_LOADING_SCREEN() {
+            clearInterval(refreshIntervalId);
+            document.getElementById("button_id").disabled = false;
+        }
+    })
+
+    //Button Disable
+    function DISABLE_BUTTON() {
+        let z = document.querySelector("#Loading_ID").innerHTML;
+        if (z.length > 0 && (z[0] == 'L' || z[0] == 'p' || z[0] == 'I'))
+            ENABLE_BUTTON();
+    }
+    let refreshIntervalId2 = setInterval(DISABLE_BUTTON, 50);
+    function ENABLE_BUTTON() {
+        document.getElementById("button_id").disabled = true;
+    }
+</script>
+
+{% endblock %}
